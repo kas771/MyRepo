@@ -1,0 +1,95 @@
+#ifndef LARLITE_LESLIESAMPLEANA_CXX
+#define LARLITE_LESLIESAMPLEANA_CXX
+
+#include "LeslieSampleAna.h"
+
+//I need to include the hit header file, since in this analysis I will be using hits
+#include "DataFormat/hit.h"
+
+namespace larlite {
+
+  bool LeslieSampleAna::initialize() {
+
+    //
+    // This function is called in the beggining of event loop
+    // Do all variable initialization you wish to do here.
+    // If you have a histogram to fill in the event loop, for example,
+    // here is a good place to create one on the heap (i.e. "new TH1D"). 
+    //
+    myhist = new TH1F("myhist","Reconstructed Hit Peak Amplitudes;Counts;Peak Amplitude [ADV]",100,0,1000);
+
+    return true;
+  }
+  
+  bool LeslieSampleAna::analyze(storage_manager* storage) {
+  
+    //
+    // Do your event-by-event analysis here. This function is called for 
+    // each event in the loop. You have "storage" pointer which contains 
+    // event-wise data. To see what is available, check the "Manual.pdf":
+    //
+    // http://microboone-docdb.fnal.gov:8080/cgi-bin/ShowDocument?docid=3183
+    // 
+    // Or you can refer to Base/DataFormatConstants.hh for available data type
+    // enum values. 
+
+
+    //Here, I get the "event hit" object for this event, for hits produced by "gaushit"
+    // "Event hit" is a std::vector of hits.
+    // To see what you're allowed to ask of hits, look at the public functions in
+    // Larlite/core/DataFormat/hit.h
+    ::larlite::event_hit *ev_hit = storage->get_data< ::larlite::event_hit>("gaushit");
+
+    //Let's check to make sure that the hits were successfully read in
+    if(!ev_hit){
+      print(msg::kERROR,__FUNCTION__,"Uh oh, I didn't find hits made by gaushit in this event. I'm skipping this event.");
+      return false;
+    }
+
+    //Let's loop over the hits, and from each hit I will get the charge, and add it to my histogram.
+    for(size_t idx = 0; idx < ev_hit->size(); idx++){
+      ::larlite::hit ihit = ev_hit->at(idx);
+      myhist->Fill(ihit.PeakAmplitude());
+
+      //Here I implement some "debug" features
+      if(_debug){
+	std::cout << "DEBUG: This hit has amplitude "
+		  << ihit.PeakAmplitude()
+		  << " and peak time of "
+		  << ihit.PeakTime()
+		  << "." << std::endl;
+	  
+      }
+    }
+
+    return true;
+  }
+
+  bool LeslieSampleAna::finalize() {
+
+    // This function is called at the end of event loop.
+    // Do all variable finalization you wish to do here.
+    // If you need, you can store your ROOT class instance in the output
+    // file. You have an access to the output file through "_fout" pointer.
+    //
+    // Say you made a histogram pointer h1 to store. You can do this:
+    //
+    // if(_fout) { _fout->cd(); h1->Write(); }
+    //
+    // else 
+    //   print(MSG::ERROR,__FUNCTION__,"Did not find an output file pointer!!! File not opened?");
+    //
+  
+    //Let's follow the above auto-generated-comments to save our output file.
+    if(_fout){
+      _fout->cd();
+      myhist->Write();
+      //It's always good to delete things when you're done with them
+      delete myhist;
+    }
+
+    return true;
+  }
+
+}
+#endif
