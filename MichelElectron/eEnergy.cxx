@@ -7,12 +7,16 @@ namespace larlite {
 
   bool eEnergy::initialize() {
     double r = 5;
-
+    mygeoutil = larutil::GeometryUtilities::GetME();
+    
     return true;
   }
   
   bool eEnergy::analyze(storage_manager* storage) {
-
+    int nInCircle = 0;
+    
+    double fTimetoCm = mygeoutil->TimeToCm();
+    double fWiretoCm = mygeoutil->WireToCm();
     
     ::larlite::event_mctrack *ev_mctrack = storage->get_data< ::larlite::event_mctrack>("mcreco");
 
@@ -24,14 +28,13 @@ namespace larlite {
     }
 
     //also check that there's only one
-    if(ev_track->size() != 1 ) {
+    if(ev_mctrack->size() != 1 ) {
       std::cout << "event that doesn't have one track" << std::endl;
       return false;
     }
 
     //for each track in event track
-     for(size_t n = 0; n < ev_mctrack->size(); n++){
-      ::larlite::mctrack track = ev_mctrack->at(n);
+      ::larlite::mctrack track = ev_mctrack->at(0);
        mcstep endpoint = track.End();
        double endX = endpoint.X();
        double endZ = endpoint.Z();
@@ -45,9 +48,15 @@ namespace larlite {
        ::larlite::event_hit *ev_hit = storage->get_data< ::larlite::event_hit>("gaushit");
        for(size_t m = 0; m < ev_hit->size(); m++){
       ::larlite::hit myhit = ev_hit->at(m);
-	 if (inCircle(myhit, centerX, centerZ) == true){
+	 if (inCircle(myhit, centerX, centerZ, fTimetoCm, fWiretoCm) == true){
+	   nInCircle += 1;
 	 }
-     }
+       }
+       
+     	 std::cout << ev_hit->size() << std::endl;
+	 std::cout << nInCircle << std::endl;
+	 //std::cout << centerX<< std::endl;
+	 // std::cout << centerZ << std::endl;
 
     return true;
   }
@@ -58,13 +67,18 @@ namespace larlite {
     return true;
   }
 
+  
   //returns true if a hit is within the radius of the circle
-  bool eEnergy::inCircle(hit myhit, double centerX, double centerZ){
-    double hitX = ;
-    double hitZ = ;
-
+  bool eEnergy::inCircle(hit myhit, double centerX, double centerZ,  double fTimetoCm, double fWiretoCm){
+    double hitX = myhit.PeakAmplitude() *fWiretoCm  ;
+    double hitZ = myhit.PeakTime() * fTimetoCm;
+    
     double dx = hitX-centerX;
-    double dz = hitz-centerz;
+    double dz = hitZ-centerZ;
+
+    
+    //  std::cout << dx << std::endl;
+    //   std::cout << dz << std::endl;
     
     if (r*r > dx*dx + dz*dz){
       return true;
@@ -72,6 +86,7 @@ namespace larlite {
 
     return false;
 }
+ 
   
 }
 #endif
