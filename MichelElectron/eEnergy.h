@@ -18,6 +18,8 @@
 #include "Analysis/ana_base.h"
 #include "DataFormat/mctrack.h"
 #include "DataFormat/mctrajectory.h"
+#include "LArUtil/LArUtilManager.h"
+#include "DataFormat/hit.h"
 
 namespace larlite {
   /**
@@ -51,7 +53,8 @@ namespace larlite {
 
   protected:
     double r;
-    
+    bool inCircle(hit myhit, double centerX, double centerZ, double fTimetoCm, double fWiretoCm);
+    const larutil::GeometryUtilities *mygeoutil;
   };
 }
 #endif
