@@ -62,6 +62,7 @@ namespace larlite {
     TH1D * mydz;
     TH1D *Hitsx;
     TH2D *phist ;
+    TH1D *histADC;
   };
 }
 #endif

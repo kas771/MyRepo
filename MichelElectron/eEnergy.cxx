@@ -11,6 +11,7 @@ namespace larlite {
     mygeoutil = larutil::GeometryUtilities::GetME();
     myprop = larutil::DetectorProperties::GetME();
 
+    /*
     mydx = new TH1D("dx", "distance from center to hit in x", 100, 0, 100);
     mydz = new TH1D("dz", "distance from center to hit in z", 100, 0, 100);
 
@@ -22,7 +23,9 @@ namespace larlite {
 
     phist -> GetXaxis() -> SetTitle("last index with non-zero p");
     phist -> GetYaxis() -> SetTitle("total number steps per track");
+    */
     
+    histADC =  new TH1D("histADC", "energy of hits in circle in MeV", 20, 30, 100);
     return true;
   }
   
@@ -65,7 +68,7 @@ namespace larlite {
 
 	 if (Px != 0 || Pz !=0) {
 	   n = l;
-	   phist -> Fill (n,track.size() );
+	   // phist -> Fill (n,track.size() );
 	 }
 	 l -= 1;
 	 
@@ -90,18 +93,16 @@ namespace larlite {
 	   Pz1 = Pz/length;
        }
 
-       std::cout <<Px1 << std::endl;
-       std::cout <<Pz1 << std::endl;
-
        //calculate location of center
        double centerX = endX + Px1*r;
        double centerZ = endZ + Pz1*r;
 
 
+         double ADC = 0.0;
        ::larlite::event_hit *ev_hit = storage->get_data< ::larlite::event_hit>("gaushit");
        for(size_t m = 0; m < ev_hit->size(); m++){
-      ::larlite::hit myhit = ev_hit->at(m);
-
+	 ::larlite::hit myhit = ev_hit->at(m);
+   
 	 if (myhit.View() == 2){
     double hitZ = myhit.WireID().Wire *fWiretoCm ;
     double hitX = (myhit.PeakTime()-triggerOffset) * fTimetoCm;
@@ -109,18 +110,25 @@ namespace larlite {
     double dx = hitX-centerX;
     double dz = hitZ-centerZ;
 
+    /*
     Hitsx -> Fill(hitX);
     mydx -> Fill(dx);
    mydz ->Fill(dz);
    myhist-> Fill(centerX, centerZ);
+    */
+  
     if (inCircle(dx, dz, r) == true){
-	   nInCircle += 1;
+      ADC += myhit.SummedADC();
 	 }
 	 }
+    
        }
-       
-     	 std::cout << ev_hit->size() << std::endl;
-	 std::cout << nInCircle << std::endl;
+
+     
+    double E  =  0.00695746*ADC + 44.6731;
+    histADC -> Fill(E);
+       // std::cout << ev_hit->size() << std::endl;
+       // std::cout << nInCircle << std::endl;
 	 //std::cout << centerX<< std::endl;
 	 // std::cout << centerZ << std::endl;
   
@@ -133,7 +141,9 @@ namespace larlite {
     
     if(_fout){
       _fout->cd();
-       myhist->Write();
+      histADC ->Write();
+      /*
+      myhist->Write();
       mydx -> Write();
       mydz -> Write();
       Hitsx -> Write();
@@ -145,6 +155,8 @@ namespace larlite {
       delete mydz;
       delete Hitsx;
       delete phist;
+      */
+      delete histADC;
     }
     
     
