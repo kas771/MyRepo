@@ -6,14 +6,18 @@
 namespace larlite {
 
   bool eEnergy::initialize() {
-    double r = 5;
+
+
     mygeoutil = larutil::GeometryUtilities::GetME();
+
+    myhist = new TH2D("myhist", "hit positions", 100, 0, 1000, 100, 0, 1000);
     
     return true;
   }
   
   bool eEnergy::analyze(storage_manager* storage) {
     int nInCircle = 0;
+    double r = 5.0;
     
     double fTimetoCm = mygeoutil->TimeToCm();
     double fWiretoCm = mygeoutil->WireToCm();
@@ -48,40 +52,52 @@ namespace larlite {
        ::larlite::event_hit *ev_hit = storage->get_data< ::larlite::event_hit>("gaushit");
        for(size_t m = 0; m < ev_hit->size(); m++){
       ::larlite::hit myhit = ev_hit->at(m);
-	 if (inCircle(myhit, centerX, centerZ, fTimetoCm, fWiretoCm) == true){
+
+    double hitZ = myhit.WireID().Wire *fWiretoCm ;
+    double hitX = myhit.PeakTime() * fTimetoCm;
+    
+    double dx = hitX-centerX;
+    double dz = hitZ-centerZ;
+
+    myhist ->Fill (dx, dz);
+  
+    if (inCircle(dx, dz, r) == true){
 	   nInCircle += 1;
 	 }
-       }
+    }
        
      	 std::cout << ev_hit->size() << std::endl;
 	 std::cout << nInCircle << std::endl;
 	 //std::cout << centerX<< std::endl;
 	 // std::cout << centerZ << std::endl;
+  
 
     return true;
   }
 
   bool eEnergy::finalize() {
 
-  
+    if(_fout){
+      _fout->cd();
+      myhist->Write();
+      //It's always good to delete things when you're done with them
+      delete myhist;
+    }
+    
     return true;
   }
 
   
   //returns true if a hit is within the radius of the circle
-  bool eEnergy::inCircle(hit myhit, double centerX, double centerZ,  double fTimetoCm, double fWiretoCm){
-    double hitX = myhit.PeakAmplitude() *fWiretoCm  ;
-    double hitZ = myhit.PeakTime() * fTimetoCm;
+  bool eEnergy::inCircle(double dx, double dz, double r){
+   
+    double r2 = r*r;
+    double dX2 =  dx*dx + dz*dz;
     
-    double dx = hitX-centerX;
-    double dz = hitZ-centerZ;
-
-    
-    //  std::cout << dx << std::endl;
-    //   std::cout << dz << std::endl;
-    
-    if (r*r > dx*dx + dz*dz){
+    if (r2> dX2){
+      std::cout << "hit in the circle" << std::endl;
       return true;
+      
     }
 
     return false;

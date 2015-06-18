@@ -20,6 +20,7 @@
 #include "DataFormat/mctrajectory.h"
 #include "LArUtil/LArUtilManager.h"
 #include "DataFormat/hit.h"
+#include "TH2.h"
 
 namespace larlite {
   /**
@@ -53,8 +54,9 @@ namespace larlite {
 
   protected:
     double r;
-    bool inCircle(hit myhit, double centerX, double centerZ, double fTimetoCm, double fWiretoCm);
+    bool inCircle(double dx, double dz, double r);
     const larutil::GeometryUtilities *mygeoutil;
+    TH2D*myhist;
   };
 }
 #endif
