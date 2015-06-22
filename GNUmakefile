@@ -20,7 +20,7 @@ endif
 #
 # Define directories to be compile upon a global "make"...
 #
-SUBDIRS := MyProject MichelElectron #ADD_NEW_SUBDIR ... do not remove this comment from this line
+SUBDIRS := MyProject MichelElectron HitViewer #ADD_NEW_SUBDIR ... do not remove this comment from this line
 
 #####################################################################################
 #
