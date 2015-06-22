@@ -2,6 +2,7 @@
 #define LARLITE_EENERGY_CXX
 
 #include "eEnergy.h"
+#include "TStyle.h"
 
 namespace larlite {
 
@@ -10,6 +11,11 @@ namespace larlite {
 
     mygeoutil = larutil::GeometryUtilities::GetME();
     myprop = larutil::DetectorProperties::GetME();
+    _tree = new TTree("_tree", "_tree");
+    _tree -> Branch("_dep_energy", & _dep_energy, " _dep_energy/D");
+    _tree -> Branch("_hits_energy", & _hits_energy, " _hits_energy/D");
+     _tree -> Branch("_n_hits_InCircle", & _n_hits_InCircle, "_n_hits_InCircle/I");
+     _tree -> Branch("_n_hits_total", &_n_hits_total, " _n_hits_total/I");
 
     /*
     mydx = new TH1D("dx", "distance from center to hit in x", 100, 0, 100);
@@ -23,9 +29,12 @@ namespace larlite {
 
     phist -> GetXaxis() -> SetTitle("last index with non-zero p");
     phist -> GetYaxis() -> SetTitle("total number steps per track");
-    */
     
-    histADC =  new TH1D("histADC", "energy of hits in circle in MeV", 20, 30, 100);
+    histADC =  new TH1D("histADC", "Energy of Hits in Circle", 20, 0, 100);
+    histADC -> GetXaxis() -> SetTitle("Energy (MeV)");
+    histADC -> GetYaxis() -> SetTitle("counts");
+    */
+
     return true;
   }
   
@@ -59,9 +68,10 @@ namespace larlite {
        double endZ = endpoint.Z();
 
        //find last index for step with non-zero momentum
+       if (track.size() > 1 ) {
        int n = 0;
        int l = track.size() -1 ;
-       while ( n == 0) {
+       while ( n == 0 && l > 0) {
 	 mcstep step  = track.at(l);
 	 double Px = step.Px();
 	 double Pz = step.Pz();
@@ -73,6 +83,7 @@ namespace larlite {
 	 l -= 1;
 	 
 	 }
+
        double Px = track.at(n).Px();
        double Pz = track.at(n).Pz();
 
@@ -100,10 +111,11 @@ namespace larlite {
 
          double ADC = 0.0;
        ::larlite::event_hit *ev_hit = storage->get_data< ::larlite::event_hit>("gaushit");
+	 if (ev_hit->size() > 0 ) {
        for(size_t m = 0; m < ev_hit->size(); m++){
 	 ::larlite::hit myhit = ev_hit->at(m);
    
-	 if (myhit.View() == 2){
+	 if (int(myhit.View()) == 2){
     double hitZ = myhit.WireID().Wire *fWiretoCm ;
     double hitX = (myhit.PeakTime()-triggerOffset) * fTimetoCm;
     
@@ -119,20 +131,35 @@ namespace larlite {
   
     if (inCircle(dx, dz, r) == true){
       ADC += myhit.SummedADC();
+      nInCircle += 1;
 	 }
 	 }
     
        }
 
+       //get energy from mcshower
+     auto ev_mcshower = storage->get_data<event_mcshower>("mcreco");
+     for(auto const& shower : *ev_mcshower){
+        //from ADCMeV.cxx
+  
+       _dep_energy = shower.DetProfile().E();
+       _tree -> Fill();
+      }
+
+     _hits_energy  =   0.00804069*ADC;
+     _n_hits_InCircle = nInCircle;
+     _n_hits_total = ev_hit->size();
+      _tree -> Fill();
      
-    double E  =  0.00695746*ADC + 44.6731;
-    histADC -> Fill(E);
-       // std::cout << ev_hit->size() << std::endl;
-       // std::cout << nInCircle << std::endl;
+    
+    // histADC -> Fill(E);
+      //std::cout << ev_hit->size() << std::endl;
+      //std::cout << nInCircle << std::endl;
 	 //std::cout << centerX<< std::endl;
 	 // std::cout << centerZ << std::endl;
   
-
+	 }
+       }
     return true;
   }
 
@@ -141,8 +168,10 @@ namespace larlite {
     
     if(_fout){
       _fout->cd();
+      _tree-> Write();
+      _tree -> Print();
+           /*
       histADC ->Write();
-      /*
       myhist->Write();
       mydx -> Write();
       mydz -> Write();
@@ -155,8 +184,10 @@ namespace larlite {
       delete mydz;
       delete Hitsx;
       delete phist;
-      */
+    
       delete histADC;
+  */
+      //	delete _tree;
     }
     
     
@@ -178,6 +209,9 @@ namespace larlite {
 
     return false;
 }
+
+  void eEnergy:: ResetTree(TTree _tree){
+  }
  
   
 }

@@ -18,9 +18,12 @@
 #include "Analysis/ana_base.h"
 #include "DataFormat/mctrack.h"
 #include "DataFormat/mctrajectory.h"
+#include "DataFormat/mcshower.h"
 #include "LArUtil/LArUtilManager.h"
 #include "DataFormat/hit.h"
 #include "TH2.h"
+#include "TTree.h"
+
 
 namespace larlite {
   /**
@@ -55,14 +58,28 @@ namespace larlite {
   protected:
     double r;
     bool inCircle(double dx, double dz, double r);
+    void ResetTree(TTree _tree);
     const larutil::GeometryUtilities *mygeoutil;
     const larutil::DetectorProperties *myprop;
+    /*
     TH2D * myhist;
     TH1D * mydx;
     TH1D * mydz;
     TH1D *Hitsx;
     TH2D *phist ;
+    */
     TH1D *histADC;
+    TTree *_tree;
+
+    //energy deposited (mcshowers)
+    double _dep_energy;
+    //summed ADC from hits
+    double _hits_energy;
+
+    int  _n_hits_InCircle;
+    int  _n_hits_total;
+
+
   };
 }
 #endif

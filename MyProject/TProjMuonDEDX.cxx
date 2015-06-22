@@ -7,9 +7,9 @@ namespace larlite {
 
   bool TProjMuonDEDX::initialize() {
 
-    projhist = new TH2D("projhist", "Projection of Residual Range vs. dE/dX on the x-z plane for mctracks", 400, 0, 50, 400, 0, 10);
-    projhist->GetXaxis()->SetTitle("Residual Range in cm");
-    projhist->GetYaxis()->SetTitle("dE/dX");
+    projhist = new TH2D("projhist", "Residual Range vs. dE/dX for Muon Truth Events in 2D", 400, 0, 50, 400, 0, 10);
+    projhist->GetXaxis()->SetTitle("Residual Range (cm)");
+    projhist->GetYaxis()->SetTitle("dE/dX (MeV/cm)");
 
      nentries = 0;
 

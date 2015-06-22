@@ -10,9 +10,9 @@ namespace larlite {
   bool TMuonDEDX::initialize() {
 
     //    myhist = new TH2D("myhist", "Residual Range vs. dE/dX for mctracks", 6670, 0, 250, 6670, 0, 100);
-    myhist = new TH2D("myhist", "Residual Range vs. dE/dX for proton mctracks", 400, 0, 50, 400, 0, 10);
-    myhist->GetXaxis()->SetTitle("Residual Range in cm");
-    myhist->GetYaxis()->SetTitle("dE/dX");
+    myhist = new TH2D("myhist", "Residual Range vs. dE/dX for Muon Truth Events in 3D", 400, 0, 50, 400, 0, 10);
+    myhist->GetXaxis()->SetTitle("Residual Range (cm)");
+    myhist->GetYaxis()->SetTitle("dE/dX (MeV/cm)");
 
     histdE = new TH1D("histdE", "dE", 100, 0, 50);
     histdX = new TH1D("histdX", "dX", 100, 0, 50);

@@ -13,9 +13,10 @@ namespace larlite {
   bool ADCMeV::initialize() {
 
     //myhist = new TH2D("myhist", "ADC hits vs. MeV showers", 100, 0, 250000, 100, 0, 1200);
-    myhist = new TH2D("myhist", "ADC hits vs. MeV showers", 100, 10000, 75000, 100, 100, 600);
-    myhist->GetYaxis()->SetTitle("Deposited energy MeV");
-    myhist->GetXaxis()->SetTitle("Summed ADC");
+    myhist = new TH2D("myhist", "Energy in ACD units and MeV for Truth Single Electrons", 500 ,0, 75000, 500, 0, 600);
+    myhist->GetYaxis()->SetTitle("Deposited Energy in MeV (mcshower)");
+    myhist->GetXaxis()->SetTitle("Summed ADC (hits)");
+
     
     return true;
   }
@@ -59,7 +60,8 @@ namespace larlite {
 
     
      //linear fit
-    myhist->Fit("pol1");
+    TF1 *myfit = new TF1("myfit","[0]*x",0,300);
+     myhist->Fit(myfit);
 
     /*TF1 *myfit = new TF1("myfit","[0]x");
     myfit->SetParName(0,"m");
