@@ -56,7 +56,13 @@ namespace larlite {
     double r;
     bool inCircle(double dx, double dz, double r);
     const larutil::GeometryUtilities *mygeoutil;
-    TH2D*myhist;
+    const larutil::DetectorProperties *myprop;
+    TH2D * myhist;
+    TH1D * mydx;
+    TH1D * mydz;
+    TH1D *Hitsx;
+    TH2D *phist ;
+    TH1D *histADC;
   };
 }
 #endif
