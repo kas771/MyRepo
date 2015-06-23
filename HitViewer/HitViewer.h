@@ -18,6 +18,8 @@
 #include "Analysis/ana_base.h"
 #include "LArUtil/LArUtilManager.h"
 #include "DataFormat/hit.h"
+#include "DataFormat/mctrack.h"
+#include "DataFormat/mctrajectory.h"
 #include "TH2D.h"
 
 
@@ -54,8 +56,10 @@ namespace larlite{
     TH2D* hHitHisto;
     
     const larutil::GeometryUtilities* mygeoutil;
+    const larutil::DetectorProperties *myprop;
     double fTimetoCm;
     double fWiretoCm;
+    double triggerOffset;
 
   };
 
