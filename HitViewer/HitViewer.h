@@ -62,7 +62,9 @@ namespace larlite{
     double fTimetoCm;
     double fWiretoCm;
     double triggerOffset;
-    double radius;
+    double r1;
+    double r2;
+    double radius_factor;
 
   };
 
