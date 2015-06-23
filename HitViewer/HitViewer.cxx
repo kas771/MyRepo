@@ -10,14 +10,16 @@ namespace larlite{
   {
     //Initializing pointers to zero is generally good practice.
     hHitHisto = 0;
+    endMuon = 0;
     //Geometry utilities
      myprop = larutil::DetectorProperties::GetME();
     mygeoutil = larutil::GeometryUtilities::GetME();
+    
     fTimetoCm = mygeoutil->TimeToCm();
     fWiretoCm = mygeoutil->WireToCm();
     triggerOffset = myprop -> TriggerOffset();
 
-
+    radius = .5;
   }
 
   //Destructor (called at the very end, to save output etc)
@@ -25,32 +27,18 @@ namespace larlite{
   {
     //Delete histograms when you're done with them!
     if(hHitHisto) delete hHitHisto;
+    if (endMuon) delete endMuon;
   }
-  /*
-     //get end of track position
-    ::larlite::event_mctrack *ev_mctrack = storage->get_data< ::larlite::event_mctrack>("mcreco");
-
-    
-    //Let's check to make sure that the hits were successfully read in
-    if(!ev_mctrack){
-      print(msg::kERROR,__FUNCTION__,"Uh oh, I didn't find any mctracks made by mcrecco in this event. I'm skipping this event.");
-      return false;
-    }
-
-    //also check that there's only one
-    if(ev_mctrack->size() != 1 ) {
-      std::cout << "event that doesn't have one track" << std::endl;
-      return false;
-    }
+  
+  void HitViewer::GenerateHisto(const larlite::event_hit *ev_hit, const larlite::event_mctrack *ev_mctrack, int plane){
 
        ::larlite::mctrack track = ev_mctrack->at(0);
        mcstep endpoint = track.End();
        double endTime = endpoint.X();
        double endWire = endpoint.Z();
-  */
 
-  void HitViewer::GenerateHisto(const larlite::event_hit *ev_hit, int plane){
-    // std::cout <<triggerOffset  << std::endl;
+       endMuon = new TEllipse (endWire, endTime, radius, radius);
+ 
 
     //First we loop over the hits to determine the histogram max and min
     //(so the histogram is automatically zoomed in to the right region for

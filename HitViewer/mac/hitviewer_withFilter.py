@@ -53,24 +53,42 @@ while mgr.next_event():
     
     #Get the hits from the data file
     ev_hit = mgr.get_data(fmwk.data.kHit,'gaushit')
+    ev_mctrack = mgr.get_data(fmwk.data.kMCTrack,'mcreco')
 
     if not ev_hit:
         print "WTF your input file doesn't have hits in it."
+        quit()
+
+    if not ev_mctrack:
+        print "no track in input file"
+        quit()
+    
+    nEvents = ev_mctrack.size()
+    if nEvents!= 1:
+        print "problem: event doesn't have one track"
         quit()
 
     plane_todraw = int(2)
 
     print "Event ID: %d, Plane: %d, Number of events drawn: %d" % (ev_hit.event_id(),plane_todraw, processed_events)
 
-    algo.GenerateHisto(ev_hit,int(plane_todraw))
+    algo.GenerateHisto(ev_hit, ev_mctrack, int(plane_todraw))
 
     canvas.cd()
     myHisto = algo.GetHitHisto()
+    endMuon = algo.GetendMuon()
+    
     if not myHisto:
         print "Uh oh something went wrong... HitViewer returned a non-existant hit histogram. Quitting!"
         quit()
 
+    if not endMuon:
+        print "couldn't draw the ellipse"
+        quit()
+
     myHisto.Draw("COLZ")
+    endMuon.SetFillColor(6)
+    endMuon.Draw()
     canvas.Update()
     
     processed_events += 1
