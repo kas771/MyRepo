@@ -15,13 +15,19 @@
 #define LARLITE_HITVIEWER_H
 
 #include <iostream>
+#include <string.h>
+#include <stdio.h>
 #include "Analysis/ana_base.h"
 #include "LArUtil/LArUtilManager.h"
 #include "DataFormat/hit.h"
 #include "DataFormat/mctrack.h"
 #include "DataFormat/mctrajectory.h"
+#include "DataFormat/mcshower.h"
 #include "TH2D.h"
 #include "TEllipse.h"
+#include "TPaveText.h"
+
+
 
 /* NOTE: this is _not_ an ana_processor module like you are used to.
 This started as an empty class (llgen_class_empty).
@@ -47,15 +53,19 @@ namespace larlite{
     /// Default destructor
     ~HitViewer();
 
-    void GenerateHisto(const larlite::event_hit *ev_hit, const larlite::event_mctrack *ev_mctrack, int plane);
+    void GenerateHisto(const larlite::event_hit *ev_hit, const larlite::event_mctrack *ev_mctrack, const larlite::event_mcshower *ev_mcshower, int plane);
 
     TH2D* GetHitHisto() { return hHitHisto; }
     TEllipse * GetendMuon() {return endMuon; }
+    TPaveText * GetBox() {return energyBox;}
+    TH2D * GetSmHisto() {return smHisto;}
 
   protected:
 
     TH2D* hHitHisto;
     TEllipse * endMuon;
+    TPaveText * energyBox;
+    TH2D * smHisto;
     
     const larutil::GeometryUtilities* mygeoutil;
     const larutil::DetectorProperties *myprop;
@@ -65,7 +75,9 @@ namespace larlite{
     double r1;
     double r2;
     double radius_factor;
-
+    double zoom;
+    double bin_factor;
+ 
   };
 
 }//end namespace larlite  

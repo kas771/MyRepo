@@ -54,21 +54,17 @@ namespace larlite {
         Finalize method to be called after all events processed.
     */
     virtual bool finalize();
+    bool inCircle(double dx, double dz, double r);
+    void ResetTree(TTree _tree);
+    double normalizeVX(double Px, double Pz);
+    double normalizeVZ(double Px, double Pz);
+    int indexP(mctrack track);
 
   protected:
     double r;
-    bool inCircle(double dx, double dz, double r);
-    void ResetTree(TTree _tree);
     const larutil::GeometryUtilities *mygeoutil;
     const larutil::DetectorProperties *myprop;
-    /*
-    TH2D * myhist;
-    TH1D * mydx;
-    TH1D * mydz;
-    TH1D *Hitsx;
-    TH2D *phist ;
-    */
-    TH1D *histADC;
+   
     TTree *_tree;
 
     //energy deposited (mcshowers)
@@ -78,6 +74,12 @@ namespace larlite {
 
     int  _n_hits_InCircle;
     int  _n_hits_total;
+
+    double _r2_shower;
+
+    //normalized direction vectors
+    double _Px;
+    double _Pz;
 
 
   };

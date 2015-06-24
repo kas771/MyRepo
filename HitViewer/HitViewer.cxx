@@ -11,21 +11,26 @@ namespace larlite{
     //Initializing pointers to zero is generally good practice.
     hHitHisto = 0;
     endMuon = 0;
+    energyBox = 0;
+    smHisto = 0;
     r1 = 0;
     r2 = 0;
 
     //arbitrary - gives size of ellipse
     radius_factor = 100;
+
+    //how close to be in the smaller histogram
+    zoom = 10;
+    bin_factor = 5;
     
     //Geometry utilities
-     myprop = larutil::DetectorProperties::GetME();
+    myprop = larutil::DetectorProperties::GetME();
     mygeoutil = larutil::GeometryUtilities::GetME();
 
     //constants
     fTimetoCm = mygeoutil->TimeToCm();
     fWiretoCm = mygeoutil->WireToCm();
     triggerOffset = myprop -> TriggerOffset();
-  
 
   }
 
@@ -35,15 +40,39 @@ namespace larlite{
     //Delete histograms when you're done with them!
     if(hHitHisto) delete hHitHisto;
     if (endMuon) delete endMuon;
+    if (energyBox) delete energyBox;
+    if (smHisto) delete smHisto;
   }
   
-  void HitViewer::GenerateHisto(const larlite::event_hit *ev_hit, const larlite::event_mctrack *ev_mctrack, int plane){
-
-    //find muon end point
+  void HitViewer::GenerateHisto(const larlite::event_hit *ev_hit, const larlite::event_mctrack *ev_mctrack, const larlite::event_mcshower *ev_mcshower, int plane){
+    
+    double Emu = 0;
+    double Ee = 0;
+    //find electron energy
+    mcshower shower = ev_mcshower-> at(0);
+    Ee  = shower.DetProfile().E();
+    
+   
+    //find muon end point and energy
        ::larlite::mctrack track = ev_mctrack->at(0);
        mcstep endpoint = track.End();
        double endTime = endpoint.X();
        double endWire = endpoint.Z();
+
+       for (auto const &step: track){
+	 Emu += step.E();
+       }
+
+    energyBox = new TPaveText();
+
+    std::string Emu1 = std::to_string(Emu);
+    std::string Ee1 = std::to_string(Ee);
+    std::string text ("E muon in Mev: " + Emu1 + ",  E electron in Mev: "+ Ee1);
+    std::cout << text << std::endl;
+    
+    energyBox -> AddText(text.c_str());
+    energyBox-> SetTextSize(.03);
+    
  
 
     //First we loop over the hits to determine the histogram max and min
@@ -103,6 +132,13 @@ namespace larlite{
 
     endMuon = new TEllipse (endWire, endTime, r2, r2);
 
+    double smWmin = endWire-zoom;
+    double smWmax =  endWire + zoom;
+    double smTmin = endTime -zoom;
+    double smTmax = endTime +zoom;
+    smHisto = new TH2D("smHisto", "End of the Muon Track", n_bins_wire/bin_factor, smWmin, smWmax, n_bins_time/bin_factor, smTmin, smTmax);
+
+
     //Now we loop again over the hits and fill this histo
     for (auto const &ihit : *ev_hit){
       
@@ -110,18 +146,21 @@ namespace larlite{
       if( (int)ihit.View() != plane )
 	continue;
 
-      //Fill the histogram, weighted by the hits summed ADC
-      //that way "bigger" hits are drawn more pronounced
-      //when you draw the histo with the "COLZ" option
+      double hitWire =  ihit.WireID().Wire*fWiretoCm;
+      double hitTime = (ihit.PeakTime()-triggerOffset) *fTimetoCm;
+      hHitHisto->Fill(hitWire, hitTime, ihit.SummedADC() );
 
-      // std::cout << "flag4" << std::endl;
+      //fill zoomed in histogram
+      if (hitWire > smWmin && hitWire < smWmax
+	  && hitTime > smTmin && hitTime < smTmax){
+	smHisto->Fill(hitWire, hitTime, ihit.SummedADC() );
+      }
 
-      hHitHisto->Fill(ihit.WireID().Wire*fWiretoCm,
-		      ( ihit.PeakTime()-triggerOffset) *fTimetoCm,
-		      ihit.SummedADC() );
-      
+      smHisto -> GetXaxis () -> SetTitle ("Wire[cm]");
+      smHisto -> GetYaxis () -> SetTitle ("Time[cm]");
 
     }//End second loop over hits to fill histogram
+
 
   }//end GenerateHisto function
 
