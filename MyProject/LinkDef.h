@@ -17,8 +17,12 @@
 #pragma link C++ class larlite::TProjMuonDEDX+;
 #pragma link C++ class larlite::ADCMeV+;
 #pragma link C++ class larlite::efilter+;
+#pragma link C++ class larlite::LogTProjMu+;
+#pragma link C++ class larlite::chi2michel+;
 //ADD_NEW_CLASS ... do not change this line
 #endif
+
+
 
 
 

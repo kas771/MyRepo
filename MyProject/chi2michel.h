@@ -21,6 +21,8 @@
 #include "DataFormat/mctrack.h"
 #include "DataFormat/mctrajectory.h"
 #include "DataFormat/mcshower.h"
+#include "TH2D.h"
+
 
 namespace larlite {
   /**
@@ -52,6 +54,8 @@ namespace larlite {
     */
     virtual bool finalize();
     double distance(hit myhit, double xstart, double zstart);
+     double distance(hit hit0, hit hit1);
+
 
   protected:
     const larutil::GeometryUtilities* mygeoutil;
@@ -63,6 +67,8 @@ namespace larlite {
 
     double position_error;
     int n_matches;
+
+    TH2D * myhist;
     
   };
 }

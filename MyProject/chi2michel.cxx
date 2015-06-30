@@ -18,6 +18,8 @@ namespace larlite {
 
     position_error = 1;
     n_matches = 0;
+
+    myhist = new TH2D("myhist", "Position of Hits", 50, 0, 1000, 50, 200, 600);
     
 
     return true;
@@ -81,7 +83,18 @@ namespace larlite {
 
      n += 1;
    }
-  */
+
+   //if no matches found
+   if (match == false) {
+     std::cout << "there was no correspond hit to the initial mcstep" << std::endl;
+     std::cout << xstart << std::endl;
+     std::cout << zstart << std::endl;
+   }
+
+   else {
+}
+   */
+   //find the start hit using the closest to the start mcstep
    int m= 0;
    ::larlite::hit firsthit = ev_hit->at(m);
    double mydistance = distance(firsthit, xstart, zstart);;
@@ -93,16 +106,78 @@ namespace larlite {
      }
    }
 
-   /*
-   //if no matches found
-   if (match == false) {
-     std::cout << "there was no correspond hit to the initial mcstep" << std::endl;
-     std::cout << xstart << std::endl;
-     std::cout << zstart << std::endl;
-   }
 
-   else {
-   */
+   //create empty array for ordered indices of hits
+   std::vector<int> ind;
+   //starting at first point
+   ind.push_back(m);
+
+   //create array of original indices
+   int nhits = ev_hit->size();
+   std::vector<int> original;
+   //fill array excluding the start point
+   for (int i = 0; i < nhits; i++){
+     if (i != m){
+       original.push_back(i);
+     }
+   }
+   
+   ::larlite::hit hit0 = ev_hit->at(m);
+   //find  second point
+   int l = original.at(0);
+   ::larlite::hit hit1 = ev_hit->at(l);
+   
+   //calculate distance between points
+   double distance1 = distance(hit0, hit1);
+
+ 
+   //while vector of original order still exists
+   while( original.size() > 1){
+     
+     //for each remaining hit
+     int j = 0;
+     for (int i = 1; i < original.size(); i ++){
+      //if the index of this hit isn't in the index array
+       ::larlite::hit myhit = ev_hit->at(original.at(i));
+      //calculate the distance from this one to the previous hit
+      double mydistance = distance(myhit, hit0);
+      //if it's the shortest distance, this is the next hit
+      if (mydistance < distance1){
+	j = i;		  
+      }
+     }
+
+   //add this to the ordered array
+   ind.push_back(original.at(j));
+    //set new last point
+   hit0 = ev_hit->at(original.at(j));
+
+   //remove that from original array
+   original.erase(original.begin() + j-1);
+    //set new second point
+    hit1 = ev_hit->at(original.at(0));
+
+    //calculate new distance between last and second points
+    distance1 = distance(hit0, hit1);
+
+    }
+
+
+   
+  ind.push_back(original.at(0));
+
+   //graph the hits
+   for(int i = 0; i < ind.size(); i ++){
+     int indexhit = ind.at(i);
+     larlite::hit myhit = ev_hit->at(indexhit);
+     double xpos = myhit.PeakTime();
+     double zpos = myhit.WireID().Wire;
+     myhist ->Fill (zpos, xpos);
+   }
+     
+     
+
+   /*
      n_matches += 1;
       std::cout << "success!" << std::endl;
      std::cout << n_matches << std::endl;
@@ -119,15 +194,17 @@ namespace larlite {
      double zhit = myhit.WireID().Wire * fWiretoCm;
      std::cout << xhit << std::endl;
      std::cout <<zhit << std ::endl;
-     //  }
-
-   
-   
+   */
    
     return true;
   }
 
   bool chi2michel::finalize() {
+     if(_fout){
+      _fout->cd();
+      myhist->Write();
+      delete myhist;
+     }
 
     return true;
   }
@@ -137,6 +214,19 @@ namespace larlite {
      double zhit = myhit.WireID().Wire * fWiretoCm;
      double dx = xstart-xhit;
      double dz = zstart- zhit;
+
+     double newdistance = dx*dx + dz*dz;
+     return newdistance;
+  }
+
+   double chi2michel:: distance(hit hit0, hit hit1 ){
+     double xhit0 = hit0.PeakTime();
+     double zhit0 = hit0.WireID().Wire;
+     double xhit1 = hit1.PeakTime();
+     double zhit1 = hit1.WireID().Wire;
+       
+     double dx = xhit1-xhit0;
+     double dz = zhit1 - zhit0;
 
      double newdistance = dx*dx + dz*dz;
      return newdistance;

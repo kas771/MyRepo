@@ -17,6 +17,9 @@ namespace larlite {
   }
   
   bool TProjMuonDEDX::analyze(storage_manager* storage) {
+    	double dEdX_l = 0;
+	double dEdX_m = 0;
+	double dEdX_n = 0;
 
     ::larlite::event_mctrack *ev_mctrack = storage->get_data< ::larlite::event_mctrack>("mcreco");
 
@@ -43,28 +46,45 @@ namespace larlite {
       double mylength = tracklength(track);
 
       //for each step in track
-      for (size_t m = 1; m < track.size()-1; m++){
+      double dx1 = projdistance(track, 1);
+      double dx2 =  projdistance(track, 2);
+       dEdX_l = dE(track, 1)/dx1;
+       if (dx1 > 0) {
+	 currentdist += projdistance(track, 1);
+	 rrange = mylength- currentdist;
+	 projhist->Fill(rrange, dEdX_l);
+       }
+       dEdX_m = dE(track, 2)/dx2;
+       if (dx2 > 0) {
+	 currentdist += projdistance(track, 2);
+	 rrange = mylength- currentdist;
+	 projhist->Fill(rrange, dEdX_m);
+       }
+       
+      for (size_t n = 3; n < track.size()-1; n++){
 	//calculate residual range
-	currentdist += projdistance(track, m);
+	currentdist += projdistance(track, n);
 	rrange = mylength- currentdist;
 
 	//calculate absolute value dEdx
-	double mydE = dE(track, m);
-	double dx = projdistance(track, m);
-	double dEdX;
-	if (dx > 0 ) {
-	  dEdX = mydE/dx;
-	  nentries += 1;
+	double mydE = dE(track, n);
+	double dx = projdistance(track, n);
+
+	dEdX_n = mydE/dx;
+
+	if (dEdX_l >5 && dEdX_m > 5 && dEdX_n > 5 && rrange <20){
+	  continue;
 	}
-	else {dEdX = 0;}
-	//std::cout<< dEdX <<std::endl;
 	
-	
-	if (dEdX > 0) {  
-	 projhist->Fill(rrange, dEdX);
+	if (dx <= 0 ) {
+	  continue;
 	}
 
+	 nentries += 1;
+	 projhist->Fill(rrange, dEdX_n);
 
+	 dEdX_l = dEdX_m;
+	 dEdX_m = dEdX_n;	 
       }
        }
 
