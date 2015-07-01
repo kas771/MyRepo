@@ -40,7 +40,7 @@ print
 # Let's run it.
 # If you want to run over the first 5 events, you can do ".run(1,5)" for example
 #my_proc.run(1,5)
-my_proc.run(1, 26)
+my_proc.run(1, 30)
 
 # done!
 print

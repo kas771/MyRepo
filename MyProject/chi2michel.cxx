@@ -19,7 +19,7 @@ namespace larlite {
     position_error = 1;
     n_matches = 0;
 
-    cutoff = 100000;
+    cutoff = 5;
 
     // myhist = new TH2D("myhist", "Position of Hits", 50, 0, 1000, 50, 200, 600);
     
@@ -59,8 +59,10 @@ namespace larlite {
     double xstart = start.X();
     double zstart = start.Z();
 
+    /*
      std::cout <<zstart << std::endl;
     std::cout <<xstart << std::endl;
+    */
     
 
     //now read in the hits from the event
@@ -157,7 +159,8 @@ namespace larlite {
    //calculate distance between points
    double distance1 = distance(hit0, hit1);
 
- 
+
+   std::cout << cutoff*cutoff << std::endl;
    //while vector of original order still exists
    while( original.size() > 0){
 
@@ -165,41 +168,55 @@ namespace larlite {
 
      int j = 0;
      bool close = false;
+     //double thisdistance = distance1;
+     double thisdistance = 99999.0;
      if (original.size() >= 2){
      //for each remaining hit
-         printvec(original);
-     for (int i = 1; i < original.size(); i ++){
+       // printvec(original);
 
-       // std::cout <<"flag2" <<std::endl;
- 
-      //if the index of this hit isn't in the index array
- 
+     for (int i = 1; i < original.size(); i ++){
        ::larlite::hit myhit = ev_hit->at(original.at(i));
-        int plane = int(myhit.View());
-	if (plane == 2 ){
        
       //calculate the distance from this one to the previous hit
       double mydistance = distance(myhit, hit0);
       
       //if it's the shortest distance, this is the next hit
-      // close = false;
-      if (mydistance < distance1){
+      std::cout <<thisdistance << std::endl;
+
+      std::cout << "md : " << mydistance
+		<< " td: " << thisdistance << std::endl;
+      if (mydistance < thisdistance){
 	j = i;
-      
 	if (mydistance < cutoff*cutoff){
 	  close = true;
 	}
+	std::cout << "was less...\n";
+        thisdistance = mydistance;
       }
-	}
+
+      /*
+      if (mydistance < thisdistance){		
+      	thisdistance = mydistance;		
+	std::cout<<thisdistance <<std::endl;	
+      }
+      */
+
+
+      
+      
      }
      }
+     
+
+     std::cout << "lowest td : " << thisdistance << "\n";
+     
      
      // std::cout <<"flag3" <<std::endl;
    
      larlite::hit thishit = ev_hit->at(original.at(j));
      mydistance = distance(hit0, thishit);
-     std::cout <<mydistance <<std::endl;
-      std::cout << j  <<std::endl;
+     //  std::cout <<mydistance <<std::endl;
+     std::cout << original.at(j)  <<std::endl;
 
 
      
@@ -221,21 +238,24 @@ namespace larlite {
     hit1 = ev_hit->at(original.at(0));
     //calculate new distance between last and second points
     distance1 = distance(hit0, hit1);
+
+    //thisdistance= distance1;
+    thisdistance= 999999.0;
    
     std::string h0 = std::to_string(ind.back());
-     std::string h1 = std::to_string(original.at(0));
-     std::cout << "hit0 = " + h0 +  ", hit1 = "+ h1 <<std::endl;
-	 }
-
+    std::string h1 = std::to_string(original.at(0));
+    std::cout << "hit0 = " + h0 +  ", hit1 = "+ h1 <<std::endl;
+   }
+   
 
 	 // std::cout <<"flag5" <<std::endl;
 
-    }
+   }
    
    // ind.push_back(original.at(0));
 
   
-   printvec(ind);
+   // printvec(ind);
   // printvec(original);
 
    //graph the hits
@@ -253,6 +273,8 @@ namespace larlite {
 
    graph = new TGraph(n, zpos, xpos);
    std::cout << n << std::endl;
+    printvec(ind);
+    
    /*
     std::cout << distance(ev_hit->at(344), ev_hit->at(343)) << std::endl;
     std::cout << distance(ev_hit->at(343), ev_hit->at(342)) << std::endl;
