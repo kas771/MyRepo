@@ -22,6 +22,8 @@
 #include "DataFormat/mctrajectory.h"
 #include "DataFormat/mcshower.h"
 #include "TH2D.h"
+#include "TGraph.h"
+
 
 
 namespace larlite {
@@ -55,6 +57,7 @@ namespace larlite {
     virtual bool finalize();
     double distance(hit myhit, double xstart, double zstart);
      double distance(hit hit0, hit hit1);
+     void printvec(std::vector<int> v);
 
 
   protected:
@@ -68,7 +71,11 @@ namespace larlite {
     double position_error;
     int n_matches;
 
+    double cutoff;
+
     TH2D * myhist;
+    TGraph*graph;
+
     
   };
 }
