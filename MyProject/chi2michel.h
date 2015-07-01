@@ -21,7 +21,6 @@
 #include "DataFormat/mctrack.h"
 #include "DataFormat/mctrajectory.h"
 #include "DataFormat/mcshower.h"
-#include "TH2D.h"
 #include "TGraph.h"
 
 
@@ -68,12 +67,10 @@ namespace larlite {
     double fWiretoCm;
     double triggerOffset;
 
-    double position_error;
     int n_matches;
 
     double cutoff;
 
-    TH2D * myhist;
     TGraph*graph;
 
     

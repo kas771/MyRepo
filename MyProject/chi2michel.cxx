@@ -16,13 +16,9 @@ namespace larlite {
     fWiretoCm = mygeoutil->WireToCm();
     triggerOffset = myprop -> TriggerOffset();
 
-    position_error = 1;
     n_matches = 0;
 
     cutoff = 5;
-
-    // myhist = new TH2D("myhist", "Position of Hits", 50, 0, 1000, 50, 200, 600);
-    
 
     return true;
   }
@@ -30,7 +26,7 @@ namespace larlite {
   bool chi2michel::analyze(storage_manager* storage) {
 
     //to find the start of the track
-    //firt read in track info
+    //first read in track info
     ::larlite::event_mctrack *ev_mctrack = storage->get_data< ::larlite::event_mctrack>("mcreco");
 
     //check to make sure that the hits were successfully read in
@@ -54,17 +50,10 @@ namespace larlite {
 
     //find location of start point from track
   
-
     larlite::mcstep start = track.Start();
     double xstart = start.X();
     double zstart = start.Z();
-
-    /*
-     std::cout <<zstart << std::endl;
-    std::cout <<xstart << std::endl;
-    */
     
-
     //now read in the hits from the event
    ::larlite::event_hit *ev_hit = storage->get_data< ::larlite::event_hit>("gaushit");
 
@@ -129,17 +118,15 @@ namespace larlite {
      }
    }
    
-
-
-   //create empty array for ordered indices of hits
+   //create empty vector for ordered indices of hits
    std::vector<int> ind;
    //starting at first point
    ind.push_back(m);
 
-   //create array of original indices
+   //create vector of original indices
    int nhits = ev_hit->size();
    std::vector<int> original;
-   //fill array excluding the start point
+   //fill excluding the start point
    for (int i = 0; i < nhits; i++){
      int plane = int(ev_hit->at(i).View());
      if (plane == 2 && i!=m ){
@@ -147,93 +134,71 @@ namespace larlite {
      }
    }
 
-   /*
-   printvec(ind);
-   printvec(original);
-   */
-   
+   //first point corresponds to starting step
    ::larlite::hit hit0 = ev_hit->at(m);
-   //find  second point
+   //second point is first in original
    ::larlite::hit hit1 = ev_hit->at(original.at(0));
    
    //calculate distance between points
    double distance1 = distance(hit0, hit1);
 
 
-   std::cout << cutoff*cutoff << std::endl;
    //while vector of original order still exists
    while( original.size() > 0){
-
-     // std::cout <<"flag1" <<std::endl;
-
      int j = 0;
      bool close = false;
-     //double thisdistance = distance1;
      double thisdistance = 99999.0;
      if (original.size() >= 2){
-     //for each remaining hit
-       // printvec(original);
-
-     for (int i = 1; i < original.size(); i ++){
-       ::larlite::hit myhit = ev_hit->at(original.at(i));
+       //for remaining unordered hits
+       for (int i = 1; i < original.size(); i ++){
+	 ::larlite::hit myhit = ev_hit->at(original.at(i));
        
-      //calculate the distance from this one to the previous hit
-      double mydistance = distance(myhit, hit0);
-      
-      //if it's the shortest distance, this is the next hit
-      std::cout <<thisdistance << std::endl;
+	 //calculate the distance from this one to the previous hit
+	 double mydistance = distance(myhit, hit0);
 
+	 /*
       std::cout << "md : " << mydistance
 		<< " td: " << thisdistance << std::endl;
+	 */
+
+      //if it's the shortest distance, this is the next hit
       if (mydistance < thisdistance){
 	j = i;
+	thisdistance = mydistance;
+	//if it's within the cutoff, could be usable
 	if (mydistance < cutoff*cutoff){
 	  close = true;
 	}
-	std::cout << "was less...\n";
-        thisdistance = mydistance;
-      }
-
-      /*
-      if (mydistance < thisdistance){		
-      	thisdistance = mydistance;		
-	std::cout<<thisdistance <<std::endl;	
-      }
-      */
-
-
-      
-      
+	//	std::cout << "was less...\n";
+      } 
      }
      }
      
 
-     std::cout << "lowest td : " << thisdistance << "\n";
-     
-     
-     // std::cout <<"flag3" <<std::endl;
-   
+     //std::cout << "lowest td : " << thisdistance << "\n";
+
+     /*
      larlite::hit thishit = ev_hit->at(original.at(j));
      mydistance = distance(hit0, thishit);
-     //  std::cout <<mydistance <<std::endl;
      std::cout << original.at(j)  <<std::endl;
+     */
 
-
-     
+    //if there's a close enough next hit
     if (close == true){
-   //add this to the ordered array
+      //add this to the ordered array
      ind.push_back(original.at(j));
     }
 
     close = false;
 
-    //set new last point
+    //set new last point on ordered track
     hit0 = ev_hit->at(ind.back());
-    //remove that from original array
+    //remove the point in question from original array
    original.erase(original.begin() + j);
 
-   //         std::cout <<"flag4" <<std::endl;
+   //if there's atleast one hit left
    if (original.size()>0){
+     
     //set new second point
     hit1 = ev_hit->at(original.at(0));
     //calculate new distance between last and second points
@@ -241,20 +206,14 @@ namespace larlite {
 
     //thisdistance= distance1;
     thisdistance= 999999.0;
-   
+    /*
     std::string h0 = std::to_string(ind.back());
     std::string h1 = std::to_string(original.at(0));
     std::cout << "hit0 = " + h0 +  ", hit1 = "+ h1 <<std::endl;
+    */
+   }	
    }
-   
-
-	 // std::cout <<"flag5" <<std::endl;
-
-   }
-   
-   // ind.push_back(original.at(0));
-
-  
+     
    // printvec(ind);
   // printvec(original);
 
@@ -274,21 +233,6 @@ namespace larlite {
    graph = new TGraph(n, zpos, xpos);
    std::cout << n << std::endl;
     printvec(ind);
-    
-   /*
-    std::cout << distance(ev_hit->at(344), ev_hit->at(343)) << std::endl;
-    std::cout << distance(ev_hit->at(343), ev_hit->at(342)) << std::endl;
-    std::cout << distance(ev_hit->at(342), ev_hit->at(341)) << std::endl;
-    std::cout << distance(ev_hit->at(341), ev_hit->at(340)) << std::endl;
-    std::cout << distance(ev_hit->at(342), ev_hit->at(340)) << std::endl;
-
-    larlite::hit problem = ev_hit -> at(342);
-    double x = (problem.PeakTime()- triggerOffset)*fTimetoCm;
-    double z = problem.WireID().Wire*fWiretoCm;
-
-    std::cout <<z <<std::endl;
-       std::cout <<x <<std::endl;
-       */
 
 
    /*
@@ -318,10 +262,6 @@ namespace larlite {
       _fout->cd();
       graph->Write();
       delete graph;
-
- 
-      // myhist->Write();
-      // delete myhist;
      }
 
     return true;
