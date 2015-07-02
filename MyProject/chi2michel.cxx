@@ -2,6 +2,8 @@
 #define LARLITE_CHI2MICHEL_CXX
 
 #include "chi2michel.h"
+#include "TAxis.h"
+#include "TFitResult.h"
 
 namespace larlite {
 
@@ -18,7 +20,9 @@ namespace larlite {
 
     n_matches = 0;
 
-    cutoff = 5;
+    cutoff = 2;
+
+    range = 5;
 
     return true;
   }
@@ -104,7 +108,8 @@ namespace larlite {
      }
      m++;
    }
-   
+
+   //finds closest hit
    double mydistance = distance(firsthit, xstart, zstart);
      
    for (int n = m+1; n < ev_hit->size(); n++){
@@ -227,13 +232,65 @@ namespace larlite {
      larlite::hit myhit = ev_hit->at(indexhit);
      xpos[i] = (myhit.PeakTime()- triggerOffset)*fTimetoCm;
      zpos[i] = myhit.WireID().Wire*fWiretoCm;
-     //myhist ->Fill (zpos, xpos);
    }
 
    graph = new TGraph(n, zpos, xpos);
    std::cout << n << std::endl;
     printvec(ind);
 
+    graph->GetXaxis()->SetTitle("Wire [cm]");
+    graph->GetYaxis()->SetTitle("Time [cm]");
+
+    
+
+
+    //get a linear fit over each range
+    Int_t k = 0;
+    double zmin;
+    double zmax;
+    Double_t chi[n-range];
+    TF1 *myfit;
+   
+    while (k < n-range){
+      std::cout << k << std::endl;
+      Int_t q = k+ range;
+      larlite::hit starthit = ev_hit->at(ind.at(k));
+      larlite::hit endhit = ev_hit->at(ind.at(q));
+     
+      zmin = starthit.WireID().Wire*fWiretoCm;
+      zmax = endhit.WireID().Wire*fWiretoCm;
+
+      
+      myfit = new TF1("myfit","pol1", zmin, zmax);
+      graph->Fit(myfit,"R");
+      
+      double chi2 = myfit-> GetChisquare();
+      chi[k] = chi2;
+      myfit = 0;
+
+      k++;
+    }
+
+    chigraph = new TGraph(n-range, zpos, chi);
+    
+    chigraph->GetXaxis()->SetTitle("Wire [cm]");
+    chigraph->GetYaxis()->SetTitle("Chi2");
+
+    double zminchi = graph->GetXaxis()->GetXmin();
+    double zmaxchi = graph->GetXaxis()->GetXmax();
+
+    double xminchi= graph->GetYaxis()->GetXmin();
+    double xmaxchi= graph->GetYaxis()->GetXmax();
+      
+    chiweighted = new TH2D("my hist", "", 100, zminchi, zmaxchi, 100, xminchi, xmaxchi);
+    for (int i = 0; i< n-range; i++){
+      chiweighted->Fill(zpos[i], xpos[i], chi[i]);
+    }
+
+    chiweighted->GetXaxis()->SetTitle("Wire [cm]");
+    chiweighted->GetYaxis()->SetTitle("Time [cm]");
+
+     
 
    /*
      n_matches += 1;
@@ -261,12 +318,17 @@ namespace larlite {
      if(_fout){
       _fout->cd();
       graph->Write();
+      chigraph->Write();
+      chiweighted->Write();
       delete graph;
+      delete chigraph;
+      delete chiweighted;
      }
 
     return true;
   }
 
+  //prints the elements in a vector
   void chi2michel::printvec(std::vector<int> v){
     std::string mystring("{ ");
     for (int i = 0; i <v.size(); i++){
@@ -277,6 +339,7 @@ namespace larlite {
     std::cout<< mystring << std::endl;
   }
 
+  //finds the closest hit in an event to a given point with x and z position
   double chi2michel:: distance(hit myhit, double xstart, double zstart){
      double xhit = (myhit.PeakTime() - triggerOffset) * fTimetoCm;
      double zhit = myhit.WireID().Wire * fWiretoCm;
@@ -287,6 +350,7 @@ namespace larlite {
      return newdistance;
   }
 
+  //finds the distance between two hits
    double chi2michel:: distance(hit hit0, hit hit1 ){
      double xhit0 = (hit0.PeakTime()- triggerOffset) * fTimetoCm;
      double zhit0 = hit0.WireID().Wire* fWiretoCm;

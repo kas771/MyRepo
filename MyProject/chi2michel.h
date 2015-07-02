@@ -22,6 +22,8 @@
 #include "DataFormat/mctrajectory.h"
 #include "DataFormat/mcshower.h"
 #include "TGraph.h"
+#include "TF1.h"
+#include "TH2.h"
 
 
 
@@ -71,7 +73,11 @@ namespace larlite {
 
     double cutoff;
 
+    int range;
+
     TGraph*graph;
+    TGraph*chigraph;
+    TH2D*chiweighted;
 
     
   };
