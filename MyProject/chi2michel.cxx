@@ -22,7 +22,8 @@ namespace larlite {
 
     cutoff = 2;
 
-    range = 5;
+    //real range = range + 1
+    range = 6;
 
     return true;
   }
@@ -223,35 +224,113 @@ namespace larlite {
   // printvec(original);
 
    //graph the hits
+   /*
   Int_t n = ind.size();
   Double_t xpos[n];
   Double_t zpos[n];
+  Double_t zerr[n];
+  Double_t xerr[n];
   
    for(Int_t i = 0; i < n; i ++){
      int indexhit = ind.at(i);
      larlite::hit myhit = ev_hit->at(indexhit);
      xpos[i] = (myhit.PeakTime()- triggerOffset)*fTimetoCm;
      zpos[i] = myhit.WireID().Wire*fWiretoCm;
+
+     zerr[i] = .3;
+     xerr[i] = fTimetoCm*10;
    }
 
-   graph = new TGraph(n, zpos, xpos);
+   graph = new TGraphErrors(n, zpos, xpos, zerr, xerr);
    std::cout << n << std::endl;
+   */
     printvec(ind);
 
-    graph->GetXaxis()->SetTitle("Wire [cm]");
-    graph->GetYaxis()->SetTitle("Time [cm]");
+    Int_t n = ind.size();
+    Double_t xpos[n];
+    Double_t zpos[n];
+    Double_t zerr[n];
+    Double_t xerr[n];
+    std::vector<double> xposv;
+    std::vector<double> zposv;
+
+    for (int f = 0; f < n; f++){
+     int indexhit = ind.at(f);
+     larlite::hit myhit = ev_hit->at(indexhit);
+     xpos[f] = (myhit.PeakTime()- triggerOffset)*fTimetoCm;
+     zpos[f] = myhit.WireID().Wire*fWiretoCm;
+     zposv.push_back(zpos[f]);
+     xposv.push_back(xpos[f]);
+    }
+
+    total = new TGraph(n, zpos, xpos);
+
+    printvec(xposv);
+    printvec(zposv);
+     int r = 0;
+
+     xposv.clear();
+     zposv.clear();
+    
+    Double_t thisxpos[range];
+    Double_t thiszpos[range];
+    Double_t thiszerr[range];
+    Double_t thisxerr[range];
+    std::vector<double> thisxposv;
+    std::vector<double> thiszposv;
 
     
 
+    int i = 0;
+    int limit = range;
 
-    //get a linear fit over each range
-    Int_t k = 0;
     double zmin;
     double zmax;
-    Double_t chi[n-range];
+    Int_t l_range = n- range;
+    Double_t chi[l_range];
+    Double_t chi_zpos[l_range];
     TF1 *myfit;
+
+      
+    Int_t k = 0;
+    Int_t l;
+
+    while(limit < ind.size()){
+
+     r=i;
+     int j = 0;
+    while( r < limit){
+     thisxpos[j] = xpos[r];
+     thiszpos[j] = zpos[r];
+     thiszposv.push_back(thiszpos[j]);
+     thisxposv.push_back(thisxpos[j]);
+
+     thiszerr[j] = .3;
+     thisxerr[j] = fTimetoCm*10;
+     r++;
+     j++;
+    }
+
+    //printvec(thisxposv);
+    //printvec(thiszposv);
    
-    while (k < n-range){
+
+    graph = new TGraphErrors(range,thiszpos,thisxpos,thiszerr,thisxerr);
+
+
+    thiszposv.clear();
+    thisxposv.clear();
+
+    
+
+     // graph->GetXaxis()->SetTitle("Wire [cm]");
+     // graph->GetYaxis()->SetTitle("Time [cm]");
+    l = k+range/2;
+    
+   
+    //  while (k < n-range){
+      /*
+       std::cout << "flag2" <<std::endl;
       std::cout << k << std::endl;
       Int_t q = k+ range;
       larlite::hit starthit = ev_hit->at(ind.at(k));
@@ -260,31 +339,60 @@ namespace larlite {
       zmin = starthit.WireID().Wire*fWiretoCm;
       zmax = endhit.WireID().Wire*fWiretoCm;
 
+
+      
+      std::cout <<"hi" << std::endl;
+      std::cout << "q " << q << "\n";
+      std::cout << "k-q " << k-q << "\n";
+      
+      
+
+      std::cout << " zmin " << zmin<< std::endl;
+      std::cout <<" zmax " << zmax<< std::endl;
+      std::cout <<" zmax - zmin " << zmax - zmin << std::endl;
+      
+      std::cout <<"bye" << std::endl;
+
       
       myfit = new TF1("myfit","pol1", zmin, zmax);
-      graph->Fit(myfit,"R");
+      graph->Fit(myfit,"F R 0 N Q");
+      */
+
+      myfit = new TF1("myfit","pol1");
+      graph->Fit(myfit,"F 0 N Q");
+      std::cout << " the ndf was " << myfit->GetNDF() << std::endl;
       
       double chi2 = myfit-> GetChisquare();
       chi[k] = chi2;
-      myfit = 0;
+      chi_zpos[k] = zpos[l];
 
-      k++;
+      delete myfit;
+      //}
+    
+
+        std::cout << "flag3" <<std::endl;
+ 
+    i++;
+    limit++;
+    k= i;
     }
 
-    chigraph = new TGraph(n-range, zpos, chi);
+    chigraph = new TGraph(l_range, chi_zpos, chi);
+        std::cout << "flag4" <<std::endl;
     
     chigraph->GetXaxis()->SetTitle("Wire [cm]");
     chigraph->GetYaxis()->SetTitle("Chi2");
 
-    double zminchi = graph->GetXaxis()->GetXmin();
-    double zmaxchi = graph->GetXaxis()->GetXmax();
 
-    double xminchi= graph->GetYaxis()->GetXmin();
-    double xmaxchi= graph->GetYaxis()->GetXmax();
+    double zminchi = total->GetXaxis()->GetXmin();
+    double zmaxchi = total->GetXaxis()->GetXmax();
+
+    double xminchi= total->GetYaxis()->GetXmin();
+    double xmaxchi= total->GetYaxis()->GetXmax();
       
     chiweighted = new TH2D("my hist", "", 100, zminchi, zmaxchi, 100, xminchi, xmaxchi);
-    for (int i = 0; i< n-range; i++){
-      chiweighted->Fill(zpos[i], xpos[i], chi[i]);
+    for (int i = 0; i< l_range; i++){
+      chiweighted->Fill(chi_zpos[i], xpos[i+(range/2)], chi[i]);
     }
 
     chiweighted->GetXaxis()->SetTitle("Wire [cm]");
@@ -310,6 +418,7 @@ namespace larlite {
      std::cout << xhit << std::endl;
      std::cout <<zhit << std ::endl;
    */
+
    
     return true;
   }
@@ -320,6 +429,7 @@ namespace larlite {
       graph->Write();
       chigraph->Write();
       chiweighted->Write();
+      total->Write();
       delete graph;
       delete chigraph;
       delete chiweighted;
@@ -330,6 +440,16 @@ namespace larlite {
 
   //prints the elements in a vector
   void chi2michel::printvec(std::vector<int> v){
+    std::string mystring("{ ");
+    for (int i = 0; i <v.size(); i++){
+      mystring.append(std::to_string(v.at(i)));
+      mystring.append(", ");
+    }
+    mystring.append("}");
+    std::cout<< mystring << std::endl;
+  }
+
+   void chi2michel::printvec(std::vector<double> v){
     std::string mystring("{ ");
     for (int i = 0; i <v.size(); i++){
       mystring.append(std::to_string(v.at(i)));

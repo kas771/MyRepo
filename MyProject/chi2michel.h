@@ -21,7 +21,7 @@
 #include "DataFormat/mctrack.h"
 #include "DataFormat/mctrajectory.h"
 #include "DataFormat/mcshower.h"
-#include "TGraph.h"
+#include "TGraphErrors.h"
 #include "TF1.h"
 #include "TH2.h"
 
@@ -59,8 +59,8 @@ namespace larlite {
     double distance(hit myhit, double xstart, double zstart);
      double distance(hit hit0, hit hit1);
      void printvec(std::vector<int> v);
-
-
+      void printvec(std::vector<double> v);
+     
   protected:
     const larutil::GeometryUtilities* mygeoutil;
     const larutil::DetectorProperties *myprop;
@@ -75,8 +75,9 @@ namespace larlite {
 
     int range;
 
-    TGraph*graph;
+    TGraphErrors*graph;
     TGraph*chigraph;
+    TGraph*total;
     TH2D*chiweighted;
 
     
