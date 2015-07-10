@@ -28,3 +28,5 @@ LDFLAGS += -L$(shell root-config --libdir)
 LDFLAGS += $(shell larlite-config --libs)
 LDFLAGS += $(shell basictool-config --libs)
 include $(LARLITE_BASEDIR)/Makefile/GNUmakefile.CORE
+
+ADDITIONAL_FLAGS += -mmacosx-version-min=10.x

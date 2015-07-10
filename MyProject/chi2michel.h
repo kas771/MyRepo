@@ -57,9 +57,9 @@ namespace larlite {
     */
     virtual bool finalize();
     double distance(hit myhit, double xstart, double zstart);
-     double distance(hit hit0, hit hit1);
-     void printvec(std::vector<int> v);
-      void printvec(std::vector<double> v);
+    double distance(hit hit0, hit hit1);
+    void printvec(std::vector<int> v);
+    void printvec(std::vector<double> v);
      
   protected:
     const larutil::GeometryUtilities* mygeoutil;
@@ -75,10 +75,11 @@ namespace larlite {
 
     int range;
 
-    TGraphErrors*graph;
-    TGraph*chigraph;
-    TGraph*total;
-    TH2D*chiweighted;
+    TGraphErrors *graph;
+    //TGraph *chigraph;
+    //TGraph *total;
+    //TH2D *chiweighted;
+    TH2D *end_plot;
 
     
   };

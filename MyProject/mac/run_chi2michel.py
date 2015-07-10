@@ -23,7 +23,7 @@ for x in xrange(len(sys.argv)-1):
 my_proc.set_io_mode(fmwk.storage_manager.kREAD)
 
 # Specify output root file name
-my_proc.set_ana_output_file("chi2michel_output_anafile.root")
+my_proc.set_ana_output_file("chi2michel_output_anafile_peak.root")
 
 # Attach an analysis unit ... here we use a base class which does nothing.
 # Replace with your analysis unit if you wish.
@@ -40,7 +40,7 @@ print
 # Let's run it.
 # If you want to run over the first 5 events, you can do ".run(1,5)" for example
 #my_proc.run(1,5)
-my_proc.run(1, 35)
+my_proc.run()
 
 # done!
 print
