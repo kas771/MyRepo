@@ -82,6 +82,9 @@ namespace larlite {
     TH2D *end_plot;
     TH1D *differences;
 
+    TH2D *end_plotx;
+    TH1D *differencesx;
+
     
   };
 }

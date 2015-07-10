@@ -34,6 +34,16 @@ namespace larlite {
     differences->SetTitle ("Difference Z Position Endpoint ChiSquare-Truth");
     differences ->GetYaxis()->SetTitle("count");
     differences ->GetXaxis()->SetTitle("Difference(cm)");
+
+    end_plotx = new TH2D("end_plot_x", "", 100, 0, 0, 100, 0, 0);
+    end_plotx->SetTitle("Muon Endpoint for Chi-Square Window of 14 Hits");
+    end_plotx->GetXaxis()->SetTitle("X Position Endpoint from Chi-Square (cm)");
+    end_plot->GetYaxis()->SetTitle("X Position Endpoint from Truth (cm)");
+
+    differencesx = new TH1D("diff_x", "", 200, -50, 50);
+    differencesx->SetTitle ("Difference X Position Endpoint ChiSquare-Truth");
+    differencesx ->GetYaxis()->SetTitle("count");
+    differencesx ->GetXaxis()->SetTitle("Difference(cm)");
     
 
     return true;
@@ -444,6 +454,7 @@ namespace larlite {
 
     //find corresponding z position
     double z_chi_max = chi_zpos[chi_ind];
+    double x_chi_max = xpos[chi_ind +range/2];
 
     std::cout<<z_chi_max <<std::endl;
     std::cout <<zend <<std::endl;
@@ -451,6 +462,9 @@ namespace larlite {
     end_plot -> Fill(z_chi_max, zend);
     differences->Fill(z_chi_max - zend);
 
+    
+    end_plotx -> Fill(x_chi_max, xend);
+    differencesx->Fill(x_chi_max - xend);
      
 
    /*
@@ -492,7 +506,13 @@ namespace larlite {
   */
       end_plot->Write();
       differences->Write();
+       end_plotx->Write();
+      differencesx->Write();
       delete end_plot;
+      delete differences;
+        delete end_plotx;
+      delete differencesx;
+      
      }
 
     return true;
