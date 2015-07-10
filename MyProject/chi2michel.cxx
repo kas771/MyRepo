@@ -26,6 +26,7 @@ namespace larlite {
     range = 6;
     
     end_plot = new TH2D("end_plot", "", 100, 0, 0, 100, 0, 0);
+    end-plot->SetTitle("Muon Endpoint for Chi-Square Window of 7 Hits");
 
     return true;
   }
@@ -440,6 +441,8 @@ namespace larlite {
     std::cout <<zend <<std::endl;
 
     end_plot -> Fill(z_chi_max, zend);
+    end_plot->GetXaxis()->SetTitle("Z Position Endpoint from Chi-Square (cm)");
+    end-plot->GetYaxis()->SetTitle("Z Position Endpoint from Truth (cm)");
      
 
    /*
