@@ -2,7 +2,7 @@
 #define LARLITE_EFILTER_CXX
 
 #include "efilter.h"
-#include "Dataformat/mcshower.h"
+#include "DataFormat/mcshower.h"
 
 namespace larlite {
 

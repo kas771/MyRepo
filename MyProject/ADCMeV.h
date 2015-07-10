@@ -16,7 +16,7 @@
 #define LARLITE_ADCMEV_H
 
 #include "Analysis/ana_base.h"
-#include "TH2.H"
+#include "TH2.h"
 #include "TProfile.h"
 #include "TF1.h"
 
