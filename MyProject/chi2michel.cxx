@@ -23,10 +23,10 @@ namespace larlite {
     cutoff = 2;
 
     //real range = range + 1
-    range = 2;
+    range = 14;
     
     end_plot = new TH2D("end_plot", "", 100, 0, 0, 100, 0, 0);
-    end_plot->SetTitle("Muon Endpoint for Chi-Square Window of 3 Hits");
+    end_plot->SetTitle("Muon Endpoint for Chi-Square Window of 15 Hits");
     end_plot->GetXaxis()->SetTitle("Z Position Endpoint from Chi-Square (cm)");
     end_plot->GetYaxis()->SetTitle("Z Position Endpoint from Truth (cm)");
 
