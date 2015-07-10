@@ -23,12 +23,18 @@ namespace larlite {
     cutoff = 2;
 
     //real range = range + 1
-    range = 34;
+    range = 14;
     
     end_plot = new TH2D("end_plot", "", 100, 0, 0, 100, 0, 0);
-    end_plot->SetTitle("Muon Endpoint for Chi-Square Window of 35 Hits");
+    end_plot->SetTitle("Muon Endpoint for Chi-Square Window of 14 Hits");
     end_plot->GetXaxis()->SetTitle("Z Position Endpoint from Chi-Square (cm)");
     end_plot->GetYaxis()->SetTitle("Z Position Endpoint from Truth (cm)");
+
+    differences = new TH1D("diff", "", 200, -50, 50);
+    differences->SetTitle ("Difference Z Position Endpoint ChiSquare-Truth");
+    differences ->GetYaxis()->SetTitle("count");
+    differences ->GetXaxis()->SetTitle("Difference(cm)");
+    
 
     return true;
   }
@@ -443,6 +449,7 @@ namespace larlite {
     std::cout <<zend <<std::endl;
 
     end_plot -> Fill(z_chi_max, zend);
+    differences->Fill(z_chi_max - zend);
 
      
 
@@ -484,6 +491,7 @@ namespace larlite {
       total->Write();
   */
       end_plot->Write();
+      differences->Write();
       delete end_plot;
      }
 

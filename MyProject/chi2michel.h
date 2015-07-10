@@ -80,6 +80,7 @@ namespace larlite {
     //TGraph *total;
     //TH2D *chiweighted;
     TH2D *end_plot;
+    TH1D *differences;
 
     
   };
