@@ -49,12 +49,26 @@ int main()
 {
 
   // The errors on z values
-  Float_t error = 0.01;
+  Float_t error = 0.1;
   errory[0]=error;
   errory[1]=error;
   errory[2]=error;
   errory[3]=error;
-  errory[4]=error;
+  errory[4]=error*10;
+
+  // // the x values
+  // x[0]=0.01;
+  // x[1]=1.01;
+  // x[2]=2.01;
+  // x[3]=3.01;
+  // x[4]=4.01;
+
+  // // the y values
+  // y[0]=1.01;
+  // y[1]=0.12;
+  // y[2]=3.93;
+  // y[3]=-10.20;
+  // y[4]=12.52;
 
   // the x values
   x[0]=0.0;
@@ -64,11 +78,12 @@ int main()
   x[4]=4.0;
 
   // the y values
-  y[0]=1.5;
-  y[1]=0.5;
-  y[2]=3.5;
-  y[3]=4.5;
-  y[4]=10.5;
+  y[0]=0.0;
+  y[1]=1.0;
+  y[2]=2.0;
+  y[3]=3.0;
+  y[4]=6.0;
+
 
   TMinuit *ptMinuit = new TMinuit(2);  //initialize TMinuit with a maximum of 2 params
   //
@@ -93,7 +108,7 @@ int main()
   
   // Set starting values and step sizes for parameters
   static Double_t vstart[2] = {-5, 1};
-  static Double_t step[2]   = {0.0001 , 0.0001};
+  static Double_t step[2]   = {0.1 , 0.1};
 
   ptMinuit->mnparm(0, "a1", vstart[0], step[0],0,0,ierflg);
   ptMinuit->mnparm(1, "a2", vstart[1], step[1],0,0,ierflg);
