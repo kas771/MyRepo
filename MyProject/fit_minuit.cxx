@@ -26,9 +26,10 @@ Float_t z[5],x[5],y[5],errorz[5];
 // this is the function used for the fit
 //par: vector with the fit parameters
 
-Double_t fit_function(float x,float y,Double_t *par)
+Double_t fit_function(float x,Double_t *par)
 {
- double value=( (par[0]*par[0])/(x*x)-1)/ ( par[1]+par[2]*y-par[3]*y*y);
+  //double value=( (par[0]*par[0])/(x*x)-1)/ ( par[1]+par[2]*y-par[3]*y*y);
+  double value=  par[0]+par[1]*x;
  return value;
 }
 
@@ -38,7 +39,7 @@ void calc_chi_square(Int_t &npar, Double_t *gin, Double_t &f, Double_t *par, Int
   double chisq = 0;
   for (int i=0;i<iNum; i++) {
     // chi square is the quadratic sum of the distance from the point to the function weighted by its error
-    double delta  = (z[i]-fit_function(x[i],y[i],par))/errorz[i];
+    double delta  = (y[i]-fit_function(x[i],par))/errory[i];
     chisq += delta*delta;
   }
   f = chisq;
