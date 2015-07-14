@@ -1,0 +1,3 @@
+clang++ -c `root-config --cflags` fit_minuit.cxx
+clang++ -o randoms `root-config --libs` -lMinuit fit_minuit.o
+./randoms
