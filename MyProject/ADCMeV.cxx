@@ -13,9 +13,9 @@ namespace larlite {
   bool ADCMeV::initialize() {
 
     //myhist = new TH2D("myhist", "ADC hits vs. MeV showers", 100, 0, 250000, 100, 0, 1200);
-    myhist = new TH2D("myhist", "Energy in ACD units and MeV for Truth Single Electrons", 500 ,0, 75000, 500, 0, 600);
+    myhist = new TH2D("myhist", "Energy in ADC units and MeV for Truth Single Electrons", 500 ,0, 75000, 500, 0, 600);
     myhist->GetYaxis()->SetTitle("Deposited Energy in MeV (mcshower)");
-    myhist->GetXaxis()->SetTitle("Summed ADC (hits)");
+    myhist->GetXaxis()->SetTitle("Integral ADC (hits)");
 
     
     return true;
@@ -40,7 +40,7 @@ namespace larlite {
       ::larlite::hit ihit = ev_hit->at(n);
       int plane = int(ihit.View());
       if (plane == 2){
-       float ADC = ihit.SummedADC();
+       float ADC = ihit.Integral();
        sumADC += ADC;
       }
     }
